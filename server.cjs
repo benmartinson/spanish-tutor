@@ -9,78 +9,46 @@ app.use(cors());
 app.use(express.json());
 
 // Create SQLite database connection
-const db = new sqlite3.Database('warehouse.db');
+const db = new sqlite3.Database('chat.db');
 
-// Create table if it doesn't exist
-db.run(`
-  CREATE TABLE IF NOT EXISTS warehouse_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    quantity INTEGER NOT NULL,
-    location TEXT,
-    category TEXT
-  )
-`);
-
-// Get all items
-app.get('/api/items', (req, res) => {
-  console.log('Received GET request for items');
-  db.all('SELECT * FROM warehouse_items', (err, rows) => {
-    if (err) {
-      console.error('Database error:', err);
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    console.log('Retrieved items:', rows);
-    res.json(rows);
-  });
-});
-
-// Add new item
-app.post('/api/items', (req, res) => {
-  console.log('Received POST request:', req.body);
-  const { name, quantity, location, category } = req.body;
-  db.run(
-    'INSERT INTO warehouse_items (name, quantity, location, category) VALUES (?, ?, ?, ?)',
-    [name, quantity, location, category],
-    function(err) {
-      if (err) {
-        console.error('Database error:', err);
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      db.get('SELECT * FROM warehouse_items WHERE id = ?', [this.lastID], (err, row) => {
-        if (err) {
-          res.status(500).json({ error: err.message });
-          return;
-        }
-        res.json(row);
-      });
-    }
-  );
-});
-
-// Delete item
-app.delete('/api/items/:id', (req, res) => {
-  const { id } = req.params;
-  db.run('DELETE FROM warehouse_items WHERE id = ?', [id], (err) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    res.json({ message: 'Item deleted' });
-  });
-});
-
-// Add proxy endpoint for DeepSeek API
 app.post('/api/chat', async (req, res) => {
   try {
+    // Call DeepSeek API
     const response = await axios.post('https://api.deepseek.com/v1/chat/completions', req.body, {
       headers: {
         'Authorization': `Bearer sk-da7d63da87954d4689393ce4622900f5`,
         'Content-Type': 'application/json'
       }
     });
+
+    // Get the bot's response text
+    const botResponse = response.data.choices[0].message.content;
+
+    // Get the user's last message from the request
+    const userMessage = req.body.messages[req.body.messages.length - 1].content;
+
+    // Save user message to database
+    db.run(
+      'INSERT INTO chat_messages (text, is_bot) VALUES (?, ?)',
+      [userMessage, false],
+      function(err) {
+        if (err) {
+          console.error('Error saving user message:', err);
+        }
+      }
+    );
+
+    // Save bot response to database
+    db.run(
+      'INSERT INTO chat_messages (text, is_bot) VALUES (?, ?)',
+      [botResponse, true],
+      function(err) {
+        if (err) {
+          console.error('Error saving bot response:', err);
+        }
+      }
+    );
+
     res.json(response.data);
   } catch (error) {
     console.error('DeepSeek API Error:', error.response?.data || error.message);
@@ -89,6 +57,51 @@ app.post('/api/chat', async (req, res) => {
       details: error.response?.data || error.message 
     });
   }
+});
+
+// Create messages table if it doesn't exist
+db.run(`
+  CREATE TABLE IF NOT EXISTS chat_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    text TEXT NOT NULL,
+    is_bot BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// Get all messages
+app.get('/api/messages', (req, res) => {
+  db.all('SELECT * FROM chat_messages ORDER BY created_at ASC', (err, rows) => {
+    if (err) {
+      console.error('Error fetching messages:', err);
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
+});
+
+// Add new message
+app.post('/api/messages', (req, res) => {
+  const { text, isBot } = req.body;
+  db.run(
+    'INSERT INTO chat_messages (text, is_bot) VALUES (?, ?)',
+    [text, isBot],
+    function(err) {
+      if (err) {
+        console.error('Error adding message:', err);
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      db.get('SELECT * FROM chat_messages WHERE id = ?', [this.lastID], (err, row) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        res.json(row);
+      });
+    }
+  );
 });
 
 const port = 3001;

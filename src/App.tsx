@@ -1,18 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css';
 import { getChatResponse, ChatMessage } from './services/deepseek';
 
 interface Message {
+  id?: number;
   text: string;
   isBot: boolean;
+  created_at?: string;
 }
 
 const App = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    { text: "¡Hola! I'm your Spanish learning assistant. How can I help you today?", isBot: true }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch('/api/messages');
+        if (!response.ok) {
+          throw new Error('Failed to fetch messages');
+        }
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
+  }, []); // Empty dependency array means this runs once when component mounts
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

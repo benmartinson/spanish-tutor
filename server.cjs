@@ -1,7 +1,7 @@
-
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -70,6 +70,25 @@ app.delete('/api/items/:id', (req, res) => {
     }
     res.json({ message: 'Item deleted' });
   });
+});
+
+// Add proxy endpoint for DeepSeek API
+app.post('/api/chat', async (req, res) => {
+  try {
+    const response = await axios.post('https://api.deepseek.com/v1/chat/completions', req.body, {
+      headers: {
+        'Authorization': `Bearer sk-da7d63da87954d4689393ce4622900f5`,
+        'Content-Type': 'application/json'
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('DeepSeek API Error:', error.response?.data || error.message);
+    res.status(500).json({ 
+      error: 'Failed to fetch from DeepSeek API',
+      details: error.response?.data || error.message 
+    });
+  }
 });
 
 const port = 3001;

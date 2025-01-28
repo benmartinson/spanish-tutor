@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const DEEPSEEK_API_URL = '/api/chat';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';

@@ -27,7 +27,7 @@ app.post('/api/chat', async (req, res) => {
     // Call DeepSeek API
     const response = await axios.post('https://api.deepseek.com/v1/chat/completions', req.body, {
       headers: {
-        'Authorization': `Bearer sk-da7d63da87954d4689393ce4622900f5`,
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json'
       }
     });

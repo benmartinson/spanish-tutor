@@ -24,7 +24,6 @@ export async function getChatResponse(messages: ChatMessage[]): Promise<string> 
       },
       {
         headers: {
-          'Authorization': `Bearer sk-da7d63da87954d4689393ce4622900f5`,
           'Content-Type': 'application/json'
         }
       }

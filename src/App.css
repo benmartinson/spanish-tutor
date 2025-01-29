@@ -1,63 +1,64 @@
+
 .app-container {
   min-height: 100vh;
   width: 100vw;
   background-color: #f3f4f6;
-  padding: 2rem 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
+  position: fixed;
   left: 0;
   top: 0;
   right: 0;
+  padding: 0;
 }
 
 .main-content {
   width: 100%;
+  height: 100vh;
   max-width: 1200px;
-  min-height: 90vh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
   background-color: white;
-  border-radius: 1rem;
+  border-radius: 0;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+  padding: 0;
+  overflow: hidden;
 }
 
 .header {
   text-align: center;
-  padding: 2.5rem 0;
-  margin-bottom: 2rem;
+  padding: 1rem 0;
+  background-color: white;
+  z-index: 1;
 }
 
 .header h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: bold;
   color: #2563eb;
+  margin: 0;
 }
 
 .header p {
-  margin-top: 1rem;
+  margin: 0.5rem 0 0;
   color: #4b5563;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .chat-container {
-  width: 100%;
   flex-grow: 1;
   background-color: #f9fafb;
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  margin: 0;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .message {
   display: flex;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .message.bot {
@@ -70,9 +71,9 @@
 
 .message-content {
   max-width: 80%;
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 1rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .bot .message-content {
@@ -88,18 +89,18 @@
 .input-form {
   width: 100%;
   display: flex;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background-color: #f9fafb;
-  border-radius: 1rem;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
 }
 
 .input-field {
   flex: 1;
-  padding: 1.5rem;
+  padding: 0.75rem;
   border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  font-size: 1.1rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
 }
 
 .input-field:focus {
@@ -109,12 +110,12 @@
 }
 
 .send-button {
-  padding: 1.5rem 3rem;
+  padding: 0.75rem 1.5rem;
   background-color: #2563eb;
   color: white;
   border: none;
-  border-radius: 1rem;
-  font-size: 1.1rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -122,4 +123,4 @@
 
 .send-button:hover {
   background-color: #1d4ed8;
-} 
+}

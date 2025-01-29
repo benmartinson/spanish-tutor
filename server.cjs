@@ -13,6 +13,17 @@ const db = new sqlite3.Database('chat.db');
 
 app.post('/api/chat', async (req, res) => {
   try {
+    console.log('Received request:', req.body);
+    
+    // Validate request body
+    if (!req.body.messages || !Array.isArray(req.body.messages)) {
+      return res.status(400).json({ error: 'Invalid request: messages array is required' });
+    }
+
+    if (!req.body.model) {
+      req.body.model = 'deepseek-chat'; // Set default model if not provided
+    }
+    
     // Call DeepSeek API
     const response = await axios.post('https://api.deepseek.com/v1/chat/completions', req.body, {
       headers: {
@@ -71,7 +82,7 @@ db.run(`
 
 // Get all messages
 app.get('/api/messages', (req, res) => {
-  db.all('SELECT * FROM chat_messages ORDER BY created_at ASC', (err, rows) => {
+  db.all('SELECT text, is_bot as isBot FROM chat_messages ORDER BY created_at ASC', (err, rows) => {
     if (err) {
       console.error('Error fetching messages:', err);
       res.status(500).json({ error: err.message });

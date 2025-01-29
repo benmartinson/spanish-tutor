@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css';
 import { getChatResponse, ChatMessage } from './services/deepseek';
 
@@ -13,6 +13,9 @@ const App = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Add ref for chat container
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -30,6 +33,13 @@ const App = () => {
 
     fetchMessages();
   }, []); // Empty dependency array means this runs once when component mounts
+
+  // Add auto-scroll effect
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]); // Trigger whenever messages change
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +74,7 @@ const App = () => {
           <p>Practice Spanish conversations</p>
         </header>
 
-        <div className="chat-container">
+        <div className="chat-container" ref={chatContainerRef}>
           {messages.map((message, index) => (
             <div 
               key={index} 
@@ -75,6 +85,15 @@ const App = () => {
               </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="message bot">
+              <div className="typing-indicator">
+                <div className="dot"></div>
+                <div className="dot"></div>
+                <div className="dot"></div>
+              </div>
+            </div>
+          )}
         </div>
 
         <form 
